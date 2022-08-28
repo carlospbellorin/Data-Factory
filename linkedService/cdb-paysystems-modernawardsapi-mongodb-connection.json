@@ -8,7 +8,7 @@
 			"connectionString": "mongodb://cdb-paysystems-dev-001:@cdb-paysystems-dev-001.mongo.cosmos.azure.com:10255/?appname=@cdb-paysystems-dev-001@;tls=true;replicaSet=globaldb;maxIdleTime=2m;retryWrites=false",
 			"database": "ModernAwardsAPI",
 			"isServerVersionAbove32": true,
-			"encryptedCredential": "ew0KICAiVmVyc2lvbiI6ICIyMDE3LTExLTMwIiwNCiAgIlByb3RlY3Rpb25Nb2RlIjogIktleSIsDQogICJTZWNyZXRDb250ZW50VHlwZSI6ICJQbGFpbnRleHQiLA0KICAiQ3JlZGVudGlhbElkIjogIkRBVEFGQUNUT1JZQEIxRDUyNjQyLTNCQzEtNEZGOS05QUMxLTQ5QUFBMkM0N0RGMl82NTMzZjYzMS1mODNjLTRkMmMtOTBlOS1kZDkyMDhlOTJlM2QiDQp9"
+			"encryptedCredential": "ew0KICAiVmVyc2lvbiI6ICIyMDE3LTExLTMwIiwNCiAgIlByb3RlY3Rpb25Nb2RlIjogIktleSIsDQogICJTZWNyZXRDb250ZW50VHlwZSI6ICJQbGFpbnRleHQiLA0KICAiQ3JlZGVudGlhbElkIjogIkRBVEFGQUNUT1JZQEIxRDUyNjQyLTNCQzEtNEZGOS05QUMxLTQ5QUFBMkM0N0RGMl84NzQ4M2QzZC04OGU4LTQwMjktYmY5ZS02YWYxYTc5ZGE4ZGYiDQp9"
 		},
 		"connectVia": {
 			"referenceName": "AutoResolveIntegrationRuntime",
