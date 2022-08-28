@@ -1,0 +1,77 @@
+{
+	"$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+	"contentVersion": "1.0.0.0",
+	"parameters": {
+		"factoryName": {
+			"type": "string",
+			"metadata": "Data Factory name",
+			"defaultValue": "df-modernawardsapi-ext-dev-001"
+		},
+		"cdb-paysystems-modernawardsapi-mongodb-connection_connectionString": {
+			"type": "secureString",
+			"metadata": "Secure string for 'connectionString' of 'cdb-paysystems-modernawardsapi-mongodb-connection'"
+		},
+		"cdb-paysystems-modernawardsapi-mongodb-connection_properties_typeProperties_database": {
+			"type": "string",
+			"defaultValue": "ModernAwardsAPI"
+		},
+		"rs_modernawardsapi_paysystems_dev_001_properties_typeProperties_url": {
+			"type": "string",
+			"defaultValue": "https://uatapi.fwc.gov.au/api/v1/awards"
+		},
+		"ModernAwardsAPI_properties_privateLinkResourceId": {
+			"type": "string",
+			"defaultValue": "/subscriptions/48273078-92e8-4957-b3f8-02aae794ec58/resourceGroups/rg-paysystems-dev-001/providers/Microsoft.DocumentDb/databaseAccounts/cdb-paysystems-dev-001"
+		},
+		"ModernAwardsAPI_properties_groupId": {
+			"type": "string",
+			"defaultValue": "MongoDB"
+		},
+		"containerUri": {
+			"type": "string",
+			"metadata": "URI to storage account containing linked ARM templates"
+		},
+		"containerSasToken": {
+			"type": "string",
+			"metadata": "Sas token to storage account containing linked ARM templates"
+		}
+	},
+	"variables": {
+		"factoryId": "[concat('Microsoft.DataFactory/factories/', parameters('factoryName'))]"
+	},
+	"resources": [
+		{
+			"name": "df-modernawardsapi-ext-dev-001_ArmTemplate_0",
+			"type": "Microsoft.Resources/deployments",
+			"apiVersion": "2018-02-01",
+			"properties": {
+				"mode": "incremental",
+				"templateLink": {
+					"uri": "[concat(parameters('containerUri'), '/ArmTemplate_0.json', parameters('containerSasToken'))]",
+					"contentVersion": "1.0.0.0"
+				},
+				"parameters": {
+					"factoryName": {
+						"value": "[parameters('factoryName')]"
+					},
+					"cdb-paysystems-modernawardsapi-mongodb-connection_connectionString": {
+						"value": "[parameters('cdb-paysystems-modernawardsapi-mongodb-connection_connectionString')]"
+					},
+					"ModernAwardsAPI_properties_privateLinkResourceId": {
+						"value": "[parameters('ModernAwardsAPI_properties_privateLinkResourceId')]"
+					},
+					"ModernAwardsAPI_properties_groupId": {
+						"value": "[parameters('ModernAwardsAPI_properties_groupId')]"
+					},
+					"cdb-paysystems-modernawardsapi-mongodb-connection_properties_typeProperties_database": {
+						"value": "[parameters('cdb-paysystems-modernawardsapi-mongodb-connection_properties_typeProperties_database')]"
+					},
+					"rs_modernawardsapi_paysystems_dev_001_properties_typeProperties_url": {
+						"value": "[parameters('rs_modernawardsapi_paysystems_dev_001_properties_typeProperties_url')]"
+					}
+				}
+			},
+			"dependsOn": []
+		}
+	]
+}

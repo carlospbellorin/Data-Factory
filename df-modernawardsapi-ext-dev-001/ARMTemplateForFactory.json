@@ -1,0 +1,324 @@
+{
+	"$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+	"contentVersion": "1.0.0.0",
+	"parameters": {
+		"factoryName": {
+			"type": "string",
+			"metadata": "Data Factory name",
+			"defaultValue": "df-modernawardsapi-ext-dev-001"
+		},
+		"cdb-paysystems-modernawardsapi-mongodb-connection_connectionString": {
+			"type": "secureString",
+			"metadata": "Secure string for 'connectionString' of 'cdb-paysystems-modernawardsapi-mongodb-connection'"
+		},
+		"cdb-paysystems-modernawardsapi-mongodb-connection_properties_typeProperties_database": {
+			"type": "string",
+			"defaultValue": "ModernAwardsAPI"
+		},
+		"rs_modernawardsapi_paysystems_dev_001_properties_typeProperties_url": {
+			"type": "string",
+			"defaultValue": "https://uatapi.fwc.gov.au/api/v1/awards"
+		},
+		"ModernAwardsAPI_properties_privateLinkResourceId": {
+			"type": "string",
+			"defaultValue": "/subscriptions/48273078-92e8-4957-b3f8-02aae794ec58/resourceGroups/rg-paysystems-dev-001/providers/Microsoft.DocumentDb/databaseAccounts/cdb-paysystems-dev-001"
+		},
+		"ModernAwardsAPI_properties_groupId": {
+			"type": "string",
+			"defaultValue": "MongoDB"
+		}
+	},
+	"variables": {
+		"factoryId": "[concat('Microsoft.DataFactory/factories/', parameters('factoryName'))]"
+	},
+	"resources": [
+		{
+			"name": "[concat(parameters('factoryName'), '/ModernAwardsAPI_ELT')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"description": "ELT process for Modern Awards API.",
+				"activities": [
+					{
+						"name": "APICall",
+						"description": "Retrieve all awards for the specified parameters",
+						"type": "WebActivity",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"url": "https://uatapi.fwc.gov.au/api/v1/awards?page=1",
+							"connectVia": {
+								"referenceName": "AutoResolveIntegrationRuntime",
+								"type": "IntegrationRuntimeReference"
+							},
+							"method": "GET",
+							"headers": {
+								"Ocp-Apim-Subscription-Key": "7bb9c348b38c49b5a9497dc5bc04c792",
+								"Cache-Control": "no-cache"
+							}
+						}
+					},
+					{
+						"name": "PagesForEach",
+						"description": "Loops each of the API's pages. ",
+						"type": "ForEach",
+						"dependsOn": [
+							{
+								"activity": "APICall",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"items": {
+								"value": "@range(1,activity('APICall').output._meta.page_count)",
+								"type": "Expression"
+							},
+							"isSequential": true,
+							"activities": [
+								{
+									"name": "Copy data1",
+									"type": "Copy",
+									"dependsOn": [],
+									"policy": {
+										"timeout": "0.12:00:00",
+										"retry": 0,
+										"retryIntervalInSeconds": 30,
+										"secureOutput": false,
+										"secureInput": false
+									},
+									"userProperties": [],
+									"typeProperties": {
+										"source": {
+											"type": "RestSource",
+											"httpRequestTimeout": "00:01:40",
+											"requestInterval": "00.00:00:00.010",
+											"requestMethod": "GET",
+											"paginationRules": {
+												"supportRFC5988": "true"
+											}
+										},
+										"sink": {
+											"type": "CosmosDbMongoDbApiSink",
+											"writeBatchTimeout": "00:30:00",
+											"writeBehavior": "insert"
+										},
+										"enableStaging": false
+									},
+									"inputs": [
+										{
+											"referenceName": "ModernAwardsAPIRESTDataset",
+											"type": "DatasetReference",
+											"parameters": {
+												"QueryParameters": {
+													"value": "?page=@{item()}",
+													"type": "Expression"
+												}
+											}
+										}
+									],
+									"outputs": [
+										{
+											"referenceName": "ModernAwardsAPIMongoDBCollection",
+											"type": "DatasetReference",
+											"parameters": {}
+										}
+									]
+								}
+							]
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {},
+					"cancelAfter": {}
+				},
+				"annotations": [],
+				"lastPublishTime": "2022-08-28T18:35:43Z"
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/integrationRuntimes/AutoResolveIntegrationRuntime')]",
+				"[concat(variables('factoryId'), '/datasets/ModernAwardsAPIRESTDataset')]",
+				"[concat(variables('factoryId'), '/datasets/ModernAwardsAPIMongoDBCollection')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/ModernAwardsAPIMongoDBCollection')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "cdb-paysystems-modernawardsapi-mongodb-connection",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "CosmosDbMongoDbApiCollection",
+				"schema": [],
+				"typeProperties": {
+					"collection": "local"
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/cdb-paysystems-modernawardsapi-mongodb-connection')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/ModernAwardsAPIRESTDataset')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "rs_modernawardsapi_paysystems_dev_001",
+					"type": "LinkedServiceReference"
+				},
+				"parameters": {
+					"QueryParameters": {
+						"type": "string"
+					}
+				},
+				"annotations": [],
+				"type": "RestResource",
+				"typeProperties": {
+					"relativeUrl": {
+						"value": "@dataset().QueryParameters",
+						"type": "Expression"
+					}
+				},
+				"schema": []
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/rs_modernawardsapi_paysystems_dev_001')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/SourceDatasetModernAwardsAPI')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "rs_modernawardsapi_paysystems_dev_001",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "RestResource",
+				"typeProperties": {
+					"relativeUrl": "?sysparm_offset={offset}",
+					"requestMethod": "GET"
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/rs_modernawardsapi_paysystems_dev_001')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/cdb-paysystems-modernawardsapi-mongodb-connection')]",
+			"type": "Microsoft.DataFactory/factories/linkedServices",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"type": "CosmosDbMongoDbApi",
+				"typeProperties": {
+					"connectionString": "[parameters('cdb-paysystems-modernawardsapi-mongodb-connection_connectionString')]",
+					"database": "[parameters('cdb-paysystems-modernawardsapi-mongodb-connection_properties_typeProperties_database')]",
+					"isServerVersionAbove32": true
+				},
+				"connectVia": {
+					"referenceName": "AutoResolveIntegrationRuntime",
+					"type": "IntegrationRuntimeReference"
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/integrationRuntimes/AutoResolveIntegrationRuntime')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/rs_modernawardsapi_paysystems_dev_001')]",
+			"type": "Microsoft.DataFactory/factories/linkedServices",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"description": "Modern Awards API linked service",
+				"annotations": [],
+				"type": "RestService",
+				"typeProperties": {
+					"url": "[parameters('rs_modernawardsapi_paysystems_dev_001_properties_typeProperties_url')]",
+					"enableServerCertificateValidation": true,
+					"authenticationType": "Anonymous",
+					"authHeaders": {
+						"Ocp-Apim-Subscription-Key": {
+							"type": "SecureString",
+							"value": "**********"
+						},
+						"Cache-Control": {
+							"type": "SecureString",
+							"value": "**********"
+						}
+					}
+				},
+				"connectVia": {
+					"referenceName": "AutoResolveIntegrationRuntime",
+					"type": "IntegrationRuntimeReference"
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/integrationRuntimes/AutoResolveIntegrationRuntime')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/AutoResolveIntegrationRuntime')]",
+			"type": "Microsoft.DataFactory/factories/integrationRuntimes",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"type": "Managed",
+				"typeProperties": {
+					"computeProperties": {
+						"location": "AutoResolve",
+						"dataFlowProperties": {
+							"computeType": "General",
+							"coreCount": 8,
+							"timeToLive": 0,
+							"cleanup": true
+						},
+						"pipelineExternalComputeScaleProperties": {
+							"timeToLive": 60
+						}
+					}
+				},
+				"managedVirtualNetwork": {
+					"type": "ManagedVirtualNetworkReference",
+					"referenceName": "default"
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/managedVirtualNetworks/default')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/default')]",
+			"type": "Microsoft.DataFactory/factories/managedVirtualNetworks",
+			"apiVersion": "2018-06-01",
+			"properties": {},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/default/ModernAwardsAPI')]",
+			"type": "Microsoft.DataFactory/factories/managedVirtualNetworks/managedPrivateEndpoints",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"privateLinkResourceId": "[parameters('ModernAwardsAPI_properties_privateLinkResourceId')]",
+				"groupId": "[parameters('ModernAwardsAPI_properties_groupId')]"
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/managedVirtualNetworks/default')]"
+			]
+		}
+	]
+}
