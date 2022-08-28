@@ -1,0 +1,108 @@
+{
+	"name": "ModernAwardsAPI_ELT",
+	"properties": {
+		"description": "ELT process for Modern Awards API.",
+		"activities": [
+			{
+				"name": "APICall",
+				"description": "Retrieve all awards for the specified parameters",
+				"type": "WebActivity",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"url": "https://uatapi.fwc.gov.au/api/v1/awards?page=1",
+					"connectVia": {
+						"referenceName": "AutoResolveIntegrationRuntime",
+						"type": "IntegrationRuntimeReference"
+					},
+					"method": "GET",
+					"headers": {
+						"Ocp-Apim-Subscription-Key": "7bb9c348b38c49b5a9497dc5bc04c792",
+						"Cache-Control": "no-cache"
+					}
+				}
+			},
+			{
+				"name": "PagesForEach",
+				"description": "Loops each of the API's pages. ",
+				"type": "ForEach",
+				"dependsOn": [
+					{
+						"activity": "APICall",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"items": {
+						"value": "@range(1,activity('APICall').output._meta.page_count)",
+						"type": "Expression"
+					},
+					"isSequential": true,
+					"activities": [
+						{
+							"name": "Copy data1",
+							"type": "Copy",
+							"dependsOn": [],
+							"policy": {
+								"timeout": "0.12:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"source": {
+									"type": "RestSource",
+									"httpRequestTimeout": "00:01:40",
+									"requestInterval": "00.00:00:00.010",
+									"requestMethod": "GET",
+									"paginationRules": {
+										"supportRFC5988": "true"
+									}
+								},
+								"sink": {
+									"type": "CosmosDbMongoDbApiSink",
+									"writeBatchTimeout": "00:30:00",
+									"writeBehavior": "insert"
+								},
+								"enableStaging": false
+							},
+							"inputs": [
+								{
+									"referenceName": "ModernAwardsAPIRESTDataset",
+									"type": "DatasetReference",
+									"parameters": {
+										"QueryParameters": {
+											"value": "?page=@{item()}",
+											"type": "Expression"
+										}
+									}
+								}
+							],
+							"outputs": [
+								{
+									"referenceName": "ModernAwardsAPIMongoDBCollection",
+									"type": "DatasetReference"
+								}
+							]
+						}
+					]
+				}
+			}
+		],
+		"annotations": [],
+		"lastPublishTime": "2022-08-28T18:35:43Z"
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
+}

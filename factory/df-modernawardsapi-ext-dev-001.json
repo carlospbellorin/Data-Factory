@@ -1,0 +1,9 @@
+{
+	"name": "df-modernawardsapi-ext-dev-001",
+	"location": "australiaeast",
+	"identity": {
+		"type": "SystemAssigned",
+		"principalId": "63b8fba1-2d1e-428a-9403-527504ec3a70",
+		"tenantId": "31b338e6-e34b-4cb8-bec2-2c65d8298784"
+	}
+}

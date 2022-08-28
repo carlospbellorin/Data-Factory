@@ -1,0 +1,28 @@
+{
+	"name": "rs_modernawardsapi_paysystems_dev_001",
+	"type": "Microsoft.DataFactory/factories/linkedservices",
+	"properties": {
+		"description": "Modern Awards API linked service",
+		"annotations": [],
+		"type": "RestService",
+		"typeProperties": {
+			"url": "https://uatapi.fwc.gov.au/api/v1/awards",
+			"enableServerCertificateValidation": true,
+			"authenticationType": "Anonymous",
+			"authHeaders": {
+				"Ocp-Apim-Subscription-Key": {
+					"type": "SecureString",
+					"value": "**********"
+				},
+				"Cache-Control": {
+					"type": "SecureString",
+					"value": "**********"
+				}
+			}
+		},
+		"connectVia": {
+			"referenceName": "AutoResolveIntegrationRuntime",
+			"type": "IntegrationRuntimeReference"
+		}
+	}
+}

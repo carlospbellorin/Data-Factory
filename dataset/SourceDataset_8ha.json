@@ -1,0 +1,16 @@
+{
+	"name": "SourceDataset_8ha",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "rs_modernawardsapi_paysystems_dev_001",
+			"type": "LinkedServiceReference"
+		},
+		"annotations": [],
+		"type": "RestResource",
+		"typeProperties": {
+			"relativeUrl": "",
+			"requestMethod": "GET"
+		}
+	},
+	"type": "Microsoft.DataFactory/factories/datasets"
+}

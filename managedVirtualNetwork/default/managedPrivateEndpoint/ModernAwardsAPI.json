@@ -1,0 +1,7 @@
+{
+	"name": "ModernAwardsAPI",
+	"properties": {
+		"privateLinkResourceId": "/subscriptions/48273078-92e8-4957-b3f8-02aae794ec58/resourceGroups/rg-paysystems-dev-001/providers/Microsoft.DocumentDb/databaseAccounts/cdb-paysystems-dev-001",
+		"groupId": "MongoDB"
+	}
+}
