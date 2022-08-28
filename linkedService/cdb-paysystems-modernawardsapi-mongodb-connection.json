@@ -1,5 +1,5 @@
 {
-	"name": "CosmosDbMongoDbApi1",
+	"name": "cdb-paysystems-modernawardsapi-mongodb-connection",
 	"type": "Microsoft.DataFactory/factories/linkedservices",
 	"properties": {
 		"annotations": [],
