@@ -2,7 +2,7 @@
 	"name": "ModernAwardsAPIMongoDBCollection",
 	"properties": {
 		"linkedServiceName": {
-			"referenceName": "CosmosDbMongoDbApi1",
+			"referenceName": "cdb-paysystems-modernawardsapi-mongodb-connection",
 			"type": "LinkedServiceReference"
 		},
 		"annotations": [],
